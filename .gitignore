@@ -12,3 +12,33 @@ local.properties
 /.idea/
 /.kotlin/
 /.pi/
+
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
+
+# Kotlin/JS
+.kotlin/
+kotlin-js-store/
+
+# Playwright MCP
+.playwright-mcp/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+*.iml
+*.ipr
+*.iws
+out/
+
+# Smoke test screenshots (generated)
+docs/smoke-reports/run*/
+docs/smoke-reports/*.png
+!docs/smoke-reports/report.md
+!docs/smoke-reports/run2/report.md
+

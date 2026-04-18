@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -14,6 +13,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
+
+private const val SPLASH_EMOJI = "📔"
+private const val APP_NAME = "DiaryAI"
 
 object SplashScreen : Screen {
 
@@ -25,12 +27,12 @@ object SplashScreen : Screen {
             verticalArrangement = Arrangement.Center,
         ) {
             Text(
-                text = "📔",
+                text = SPLASH_EMOJI,
                 style = MaterialTheme.typography.displayLarge,
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "DiaryAI",
+                text = APP_NAME,
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
             )
