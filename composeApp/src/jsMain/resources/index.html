@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DiaryAI</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="ComposeTarget"></canvas>
+    <script type="module">
+        import loadSkikoWASM from './kotlin/skiko.mjs';
+        await loadSkikoWASM();
+        // After WASM is ready, dynamically load the composeApp bundle
+        const script = document.createElement('script');
+        script.src = 'composeApp.js';
+        script.onload = () => {
+            if (typeof composeApp !== 'undefined' && typeof composeApp.main === 'function') {
+                composeApp.main();
+            }
+        };
+        document.head.appendChild(script);
+    </script>
+</body>
+</html>
