@@ -6,6 +6,7 @@ import com.diaryai.data.mapper.DiaryEntryDtoToDomainMapper
 import com.diaryai.domain.model.DiaryEntry
 import com.diaryai.domain.model.Mood
 import kotlinx.coroutines.test.runTest
+import kotlin.requireNotNull
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
@@ -127,7 +128,7 @@ class DiaryEntryRepositoryImplTest {
 
         assertTrue(result.isFailure)
         assertIs<NoSuchElementException>(result.exceptionOrNull())
-        assertTrue(result.exceptionOrNull()!!.message?.contains(UNKNOWN_ID) == true)
+        assertTrue(requireNotNull(result.exceptionOrNull()).message?.contains(UNKNOWN_ID) == true)
     }
 
     @Test

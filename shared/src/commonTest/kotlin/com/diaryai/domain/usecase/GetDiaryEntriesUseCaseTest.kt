@@ -10,8 +10,7 @@ import kotlin.test.assertTrue
 
 class GetDiaryEntriesUseCaseTest {
 
-    // BUG SCENARIO 4: Mock returns only 1 entry but test asserts size == 2.
-    // Bug-fix agent should find the mismatch between mock setup and assertion.
+    // Stub repository returning 2 entries for use-case tests.
 
     private val repo = object : DiaryEntryRepository {
         override suspend fun getEntries(): Result<List<DiaryEntry>> =
@@ -38,7 +37,7 @@ class GetDiaryEntriesUseCaseTest {
     fun `returns entries from repository`() = runTest {
         val result = useCase()
         assertTrue(result.isSuccess)
-        assertEquals(2, result.getOrThrow().size)  // BUG: expects 2, but mock returns 1
+        assertEquals(2, result.getOrThrow().size)
     }
 
     @Test

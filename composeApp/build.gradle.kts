@@ -5,9 +5,35 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kotlinSerialization)
+    alias(libs.plugins.androidApplication)
+}
+
+android {
+    namespace = "com.diaryai"
+    compileSdk = 35
+
+    defaultConfig {
+        applicationId = "com.diaryai"
+        minSdk = 24
+        targetSdk = 35
+        versionCode = 1
+        versionName = "1.0"
+    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
 }
 
 kotlin {
+    androidTarget()
     jvm("desktop")
     js(IR) {
         browser {
@@ -19,6 +45,7 @@ kotlin {
     }
 
     sourceSets {
+        val androidMain by getting
         val desktopMain by getting
         val jsMain by getting
 
@@ -28,24 +55,19 @@ kotlin {
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material3)
-            implementation(compose.components.resources)
             implementation(compose.ui)
 
             implementation(libs.voyager.navigator)
-            implementation(libs.voyager.screenmodel)
-            implementation(libs.voyager.transitions)
 
-            implementation(libs.koin.core)
-            implementation(libs.koin.compose)
-
-            implementation(libs.kotlinx.coroutines.core)
-
-            implementation(libs.kamel.image)
+            implementation(libs.napier)
         }
 
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
-            implementation(libs.kotlinx.coroutines.swing)
+        }
+
+        androidMain.dependencies {
+            implementation(libs.activity.compose)
         }
     }
 }
