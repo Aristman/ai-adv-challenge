@@ -5,23 +5,25 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kotlinSerialization)
-    alias(libs.plugins.androidApplication)
 }
 
 kotlin {
-    androidTarget()
-
     jvm("desktop")
-
     js(IR) {
-        browser()
+        browser {
+            commonWebpackConfig {
+                outputFileName = "composeApp.js"
+            }
+        }
+        binaries.executable()
     }
 
     sourceSets {
         val desktopMain by getting
+        val jsMain by getting
 
         commonMain.dependencies {
-            implementation(projects.shared)
+            implementation(project(":shared"))
 
             implementation(compose.runtime)
             implementation(compose.foundation)
@@ -41,30 +43,10 @@ kotlin {
             implementation(libs.kamel.image)
         }
 
-        androidMain.dependencies {
-            implementation(libs.kotlinx.coroutines.swing)
-        }
-
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)
         }
-    }
-}
-
-android {
-    namespace = "com.diaryai"
-    compileSdk = 35
-    defaultConfig {
-        applicationId = "com.diaryai"
-        minSdk = 26
-        targetSdk = 35
-        versionCode = 1
-        versionName = "1.0.0"
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
     }
 }
 
