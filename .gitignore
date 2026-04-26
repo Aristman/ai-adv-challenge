@@ -42,3 +42,7 @@ docs/smoke-reports/*.png
 !docs/smoke-reports/report.md
 !docs/smoke-reports/run2/report.md
 
+# Node.js (fine-tuning)
+node_modules/
+dist/
+
