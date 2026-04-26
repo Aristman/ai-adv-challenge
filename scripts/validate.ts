@@ -134,12 +134,18 @@ function validateLine(
     }
   }
 
-  // 4. All content non-empty and not null
+  // 4. All content must be a non-empty string
   for (const msg of messages) {
-    if (msg.content === null || msg.content === undefined || msg.content === "") {
+    if (typeof msg.content !== "string") {
       return {
         line: lineIndex,
-        reason: `${msg.role} content is empty or null`,
+        reason: `${msg.role} content is not a string (got ${typeof msg.content})`,
+      };
+    }
+    if (msg.content === "") {
+      return {
+        line: lineIndex,
+        reason: `${msg.role} content is empty`,
       };
     }
   }

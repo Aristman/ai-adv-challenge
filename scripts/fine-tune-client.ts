@@ -149,11 +149,9 @@ async function monitorJob(
 
     // Extract progress if available
     let progressInfo = "";
-    if (job.fine_tuning_job) {
-      const ftJob = job.fine_tuning_job;
-      if (ftJob.current_epoch && ftJob.total_epochs) {
-        progressInfo = ` (epoch ${ftJob.current_epoch}/${ftJob.total_epochs})`;
-      }
+    const nEpochs = job.hyperparameters?.n_epochs;
+    if (nEpochs !== undefined && nEpochs !== null) {
+      progressInfo = ` (${nEpochs} epochs)`;
     }
 
     console.info(`  [${elapsedLabel}] Status: ${statusStr}${progressInfo}`);
@@ -176,11 +174,9 @@ async function checkJobStatus(client: OpenAI, jobId: string): Promise<void> {
       console.error(`  Error: ${job.error.message}`);
     }
 
-    if (job.fine_tuning_job) {
-      const ftJob = job.fine_tuning_job;
-      if (ftJob.current_epoch && ftJob.total_epochs) {
-        console.info(`  Epoch: ${ftJob.current_epoch}/${ftJob.total_epochs}`);
-      }
+    const nEpochs = job.hyperparameters?.n_epochs;
+    if (nEpochs !== undefined && nEpochs !== null) {
+      console.info(`  Epochs: ${nEpochs}`);
     }
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);

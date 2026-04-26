@@ -109,6 +109,9 @@ async function main(): Promise<void> {
     };
 
     try {
+      // Baseline intentionally omits the system prompt to measure the model's raw ability
+      // without style/format guidance. The fine-tuned model has these patterns baked in
+      // from training data, so comparing "raw" vs "fine-tuned" is meaningful.
       const response = await client.chat.completions.create({
         model: "gpt-4o-mini",
         temperature: 0,
