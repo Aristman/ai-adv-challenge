@@ -201,14 +201,13 @@ async function main(): Promise<void> {
     );
     process.exit(1);
   }
-
+  try {
   // 3. Check Ollama health
   console.info("[test] Checking Ollama health...");
   const ollamaClient = new OllamaClient();
   const ollamaHealthy = await ollamaClient.healthCheck();
   if (!ollamaHealthy) {
     console.error("[test] Ollama is not available. Exiting.");
-    await llamaManager.stop();
     process.exit(1);
   }
   console.info("[test] Ollama is healthy.\n");
@@ -231,7 +230,6 @@ async function main(): Promise<void> {
   const datasetPath = resolve(process.cwd(), "data/routing-testset.jsonl");
   if (!existsSync(datasetPath)) {
     console.error(`[test] Dataset not found: ${datasetPath}`);
-    await llamaManager.stop();
     process.exit(1);
   }
   const examples = readJsonl<TestExample>(datasetPath);
@@ -425,9 +423,10 @@ async function main(): Promise<void> {
   writeFileSync(summaryPath, JSON.stringify(summary, null, 2), "utf-8");
   console.info(`[test] Summary saved to ${summaryPath}\n`);
 
-  // 9. Stop llama-server
-  console.info("[test] Stopping llama-server...");
-  await llamaManager.stop();
+  } finally {
+    console.info("[test] Stopping llama-server...");
+    await llamaManager.stop();
+  }
   console.info("[test] Done.");
 }
 
@@ -610,7 +609,7 @@ function printSummaryTable(summary: RoutingSummary): void {
     const label = cat.charAt(0).toUpperCase() + cat.slice(1);
     console.info(
       row(
-        `  ${padEnd(label + ":", 9)} ${formatPct(Math.round(acc * 10), 10)} accuracy, kw match ${formatPct(Math.round(kw * 10), 10)}`,
+        `  ${padEnd(label + ":", 9)} ${formatPct(Math.round(acc * 100), 100)} accuracy, kw match ${formatPct(Math.round(kw * 100), 100)}`,
       ),
     );
   }

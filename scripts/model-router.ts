@@ -85,9 +85,9 @@ const UNCERTAINTY_PATTERNS: readonly RegExp[] = [
 
 function extractConfidence(text: string): number {
   const patterns: readonly RegExp[] = [
-    /CONFIDENCE:\s*(\d+(?:\.\d+)?)/i,
-    /уверенност[ьи]:\s*(\d+(?:\.\d+)?)/i,
-    /confidence\s*[:=]\s*(\d+(?:\.\d+)?)/i,
+    /CONFIDENCE:\s*(-?\d+(?:\.\d+)?)/i,
+    /уверенност[ьи]:\s*(-?\d+(?:\.\d+)?)/i,
+    /confidence\s*[:=]\s*(-?\d+(?:\.\d+)?)/i,
   ];
   for (const pattern of patterns) {
     const match = text.match(pattern);
