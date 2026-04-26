@@ -1,0 +1,18 @@
+{
+  "name": "fine-tune-kotlin",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "validate": "npx ts-node scripts/validate.ts",
+    "baseline": "npx ts-node scripts/baseline.ts",
+    "fine-tune": "npx ts-node scripts/fine-tune-client.ts"
+  },
+  "dependencies": {
+    "openai": "^4.73.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.0"
+  }
+}
