@@ -86,6 +86,7 @@ function assessConfidence(input: ConfidenceInput): ConfidenceReport {
       if (decision !== "REJECT") {
         decision = "REVIEW";
       }
+      hardReject = true;
       reasons.push(
         `Self-check removed ${removedCount}/${originalCount} entities (>50%)`,
       );

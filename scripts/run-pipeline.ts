@@ -309,6 +309,11 @@ async function runPipeline(): Promise<void> {
 
   // ── Aggregate metrics ──────────────────────────────────────────────────
 
+  if (results.length === 0) {
+    console.warn("No results to summarize.");
+    return;
+  }
+
   const categories = ["correct", "boundary", "hard"] as const;
 
   // Overall metrics
@@ -432,63 +437,63 @@ async function runPipeline(): Promise<void> {
   // ── Print summary table ────────────────────────────────────────────────
 
   console.info("\n╔══════════════════════════════════════════════════════════════╗");
-  console.info("║                  EVALUATION SUMMARY                         ║");
+  console.info("║                   EVALUATION SUMMARY                         ║");
   console.info("╠══════════════════════════════════════════════════════════════╣");
-  console.info(`║  Model:    ${summary.model.padEnd(48)}║`);
-  console.info(`║  Examples: ${String(summary.total_examples).padEnd(48)}║`);
+  console.info(`║  Model:    ${summary.model.padEnd(50)}║`);
+  console.info(`║  Examples: ${String(summary.total_examples).padEnd(50)}║`);
   console.info("╠══════════════════════════════════════════════════════════════╣");
-  console.info("║  OVERALL METRICS                                              ║");
-  console.info(`║    Precision:    ${summary.overall_metrics.avg_precision.toFixed(4).padEnd(42)}║`);
-  console.info(`║    Recall:       ${summary.overall_metrics.avg_recall.toFixed(4).padEnd(42)}║`);
-  console.info(`║    F1:           ${summary.overall_metrics.avg_f1.toFixed(4).padEnd(42)}║`);
+  console.info("║  OVERALL METRICS                                             ║");
+  console.info(`║    Precision:    ${summary.overall_metrics.avg_precision.toFixed(4).padEnd(44)}║`);
+  console.info(`║    Recall:       ${summary.overall_metrics.avg_recall.toFixed(4).padEnd(44)}║`);
+  console.info(`║    F1:           ${summary.overall_metrics.avg_f1.toFixed(4).padEnd(44)}║`);
   console.info("╠══════════════════════════════════════════════════════════════╣");
-  console.info("║  PRECISION BY CATEGORY                                        ║");
+  console.info("║  PRECISION BY CATEGORY                                       ║");
   for (const cat of categories) {
     const val = summary.overall_metrics.precision_by_category[cat];
     console.info(
-      `║    ${cat.padEnd(12)} ${val.toFixed(4).padEnd(35)}║`,
+      `║    ${cat.padEnd(12)} ${val.toFixed(4).padEnd(45)}║`,
     );
   }
   console.info("╠══════════════════════════════════════════════════════════════╣");
-  console.info("║  RECALL BY CATEGORY                                           ║");
+  console.info("║  RECALL BY CATEGORY                                          ║");
   for (const cat of categories) {
     const val = summary.overall_metrics.recall_by_category[cat];
     console.info(
-      `║    ${cat.padEnd(12)} ${val.toFixed(4).padEnd(35)}║`,
+      `║    ${cat.padEnd(12)} ${val.toFixed(4).padEnd(45)}║`,
     );
   }
   console.info("╠══════════════════════════════════════════════════════════════╣");
-  console.info("║  CONFIDENCE METRICS                                           ║");
+  console.info("║  CONFIDENCE METRICS                                          ║");
   console.info(
-    `║    Avg Confidence: ${summary.confidence_metrics.avg_confidence.toFixed(4).padEnd(36)}║`,
+    `║    Avg Confidence: ${summary.confidence_metrics.avg_confidence.toFixed(4).padEnd(42)}║`,
   );
   console.info(
-    `║    ACCEPT: ${String(summary.confidence_metrics.accepted).padEnd(6)} REVIEW: ${String(summary.confidence_metrics.review).padEnd(6)} REJECT: ${String(summary.confidence_metrics.rejected).padEnd(6)}║`,
+    `║    ACCEPT: ${String(summary.confidence_metrics.accepted).padEnd(11)} REVIEW: ${String(summary.confidence_metrics.review).padEnd(11)} REJECT: ${String(summary.confidence_metrics.rejected).padEnd(10)}║`,
   );
   console.info(
-    `║    Accept Rate: ${summary.confidence_metrics.accept_rate.toFixed(4).padEnd(37)}║`,
-  );
-  console.info("╠══════════════════════════════════════════════════════════════╣");
-  console.info("║  LATENCY METRICS                                              ║");
-  console.info(
-    `║    Avg Self-Check: ${String(summary.latency_metrics.avg_self_check_ms).padEnd(7)}ms${"".padEnd(30)}║`,
-  );
-  console.info(
-    `║    Avg Total:      ${String(summary.latency_metrics.avg_total_ms).padEnd(7)}ms${"".padEnd(30)}║`,
-  );
-  console.info(
-    `║    p50: ${String(summary.latency_metrics.p50_ms).padEnd(7)}ms  p95: ${String(summary.latency_metrics.p95_ms).padEnd(7)}ms  p99: ${String(summary.latency_metrics.p99_ms).padEnd(7)}ms║`,
+    `║    Accept Rate: ${summary.confidence_metrics.accept_rate.toFixed(4).padEnd(45)}║`,
   );
   console.info("╠══════════════════════════════════════════════════════════════╣");
-  console.info("║  CONSTRAINT METRICS                                           ║");
+  console.info("║  LATENCY METRICS                                             ║");
   console.info(
-    `║    Avg Errors:    ${summary.constraint_metrics.avg_errors.toFixed(4).padEnd(37)}║`,
+    `║    Avg Self-Check: ${String(summary.latency_metrics.avg_self_check_ms).padEnd(7)}ms${"".padEnd(33)}║`,
   );
   console.info(
-    `║    Avg Warnings:  ${summary.constraint_metrics.avg_warnings.toFixed(4).padEnd(37)}║`,
+    `║    Avg Total:      ${String(summary.latency_metrics.avg_total_ms).padEnd(7)}ms${"".padEnd(33)}║`,
   );
   console.info(
-    `║    Perfect Rate:  ${summary.constraint_metrics.perfect_constraint_rate.toFixed(4).padEnd(37)}║`,
+    `║    p50: ${String(summary.latency_metrics.p50_ms).padEnd(11)}ms  p95: ${String(summary.latency_metrics.p95_ms).padEnd(11)}ms  p99: ${String(summary.latency_metrics.p99_ms).padEnd(11)}ms║`,
+  );
+  console.info("╠══════════════════════════════════════════════════════════════╣");
+  console.info("║  CONSTRAINT METRICS                                          ║");
+  console.info(
+    `║    Avg Errors:    ${summary.constraint_metrics.avg_errors.toFixed(4).padEnd(43)}║`,
+  );
+  console.info(
+    `║    Avg Warnings:  ${summary.constraint_metrics.avg_warnings.toFixed(4).padEnd(43)}║`,
+  );
+  console.info(
+    `║    Perfect Rate:  ${summary.constraint_metrics.perfect_constraint_rate.toFixed(4).padEnd(43)}║`,
   );
   console.info("╚══════════════════════════════════════════════════════════════╝");
 }

@@ -270,6 +270,34 @@ function checkDuplicates(entities: Entity[]): ConstraintViolation[] {
   return violations;
 }
 
+/** Fuzzy check: Russian morphology tolerant matching */
+function sourceTextFuzzyContains(sourceText: string, entityValue: string): boolean {
+  const valueLower = entityValue.toLowerCase();
+  const textLower = sourceText.toLowerCase();
+
+  // Exact match (case-insensitive)
+  if (textLower.includes(valueLower)) return true;
+
+  // Check first word root (min 4 chars) for Russian morphology
+  const firstWord = valueLower.split(/\s+/)[0];
+  if (firstWord.length >= 4) {
+    const root = firstWord.substring(0, Math.min(4, firstWord.length));
+    if (textLower.includes(root)) return true;
+  }
+
+  // Strip common Russian endings and check each word
+  const endings = /(?:ой|ая|ое|ые|ом|ем|у|а|ов|ев|ин|ич|на|ни|ко|ка|ки|ам|ами|ах|ях|ю|е|и|ь|ё|го|му|ым|ую|ее|его|ому|ыми)$/;
+  const words = valueLower.split(/\s+/);
+  const allMatch = words.every((word) => {
+    if (word.length < 3) return true;
+    const stem = word.replace(endings, "");
+    return stem.length >= 2 && textLower.includes(stem);
+  });
+  if (allMatch && words.length > 0) return true;
+
+  return false;
+}
+
 /** Rule 10: Entity value appears in source text */
 function checkSourceTextPresence(
   entities: Entity[],
@@ -282,14 +310,17 @@ function checkSourceTextPresence(
     if (trimmed.length === 0) {
       continue;
     }
-    if (!sourceText.includes(trimmed)) {
-      violations.push({
-        entity,
-        rule: "source-text-presence",
-        message: `Entity value "${entity.value}" not found in source text — model may have hallucinated.`,
-        severity: "warning",
-      });
+
+    if (sourceTextFuzzyContains(sourceText, trimmed)) {
+      continue;
     }
+
+    violations.push({
+      entity,
+      rule: "source-text-presence",
+      message: `Entity value "${entity.value}" not found in source text — model may have hallucinated.`,
+      severity: "warning",
+    });
   }
 
   return violations;

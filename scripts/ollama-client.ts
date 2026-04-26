@@ -140,19 +140,19 @@ class OllamaClient {
   // ── Health check ────────────────────────────────────────────────────────
 
   async healthCheck(): Promise<boolean> {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 5_000);
     try {
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 5_000);
-
       const response = await fetch(`${this.baseUrl}/api/tags`, {
         signal: controller.signal,
       });
 
-      clearTimeout(timer);
       return response.ok;
     } catch (err) {
       console.error("[ollama] health check failed:", err instanceof Error ? err.message : String(err));
       return false;
+    } finally {
+      clearTimeout(timer);
     }
   }
 }
