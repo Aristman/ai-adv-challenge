@@ -11,18 +11,20 @@ class DiaryEntryDtoToDomainMapper {
         const val LOG_TAG = "DiaryEntryDtoToDomainMapper"
     }
 
-    fun map(dto: DiaryEntryDto): DiaryEntry = DiaryEntry(
-        id = dto.id,
-        content = dto.content,
-        date = dto.date,
-        mood = dto.mood?.let { moodStr ->
-            runCatching { Mood.valueOf(moodStr) }.onFailure {
-                Napier.w("Invalid mood value: '$moodStr' for entry ${dto.id}", throwable = it, tag = LOG_TAG)
-            }.getOrElse { throw it }
-        },
-        tags = dto.tags,
-        aiSummary = dto.aiSummary,
-    )
+    fun map(dto: DiaryEntryDto): Result<DiaryEntry> = runCatching {
+        DiaryEntry(
+            id = dto.id,
+            content = dto.content,
+            date = dto.date,
+            mood = dto.mood?.let { moodStr ->
+                runCatching { Mood.valueOf(moodStr) }.onFailure {
+                    Napier.w("Invalid mood value: '$moodStr' for entry ${dto.id}", throwable = it, tag = LOG_TAG)
+                }.getOrThrow()
+            },
+            tags = dto.tags,
+            aiSummary = dto.aiSummary,
+        )
+    }
 
     fun mapReverse(entry: DiaryEntry): DiaryEntryDto = DiaryEntryDto(
         id = entry.id,

@@ -6,7 +6,7 @@ import com.diaryai.domain.model.Mood
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
-import kotlin.test.assertFailsWith
+import kotlin.test.assertTrue
 
 class DiaryEntryDtoToDomainMapperTest {
 
@@ -44,7 +44,8 @@ class DiaryEntryDtoToDomainMapperTest {
     fun `map converts full dto to domain entry`() {
         val result = mapper.map(fullDto)
 
-        assertEquals(fullEntry, result)
+        assertTrue(result.isSuccess)
+        assertEquals(fullEntry, result.getOrThrow())
     }
 
     @Test
@@ -53,7 +54,8 @@ class DiaryEntryDtoToDomainMapperTest {
 
         val result = mapper.map(dto)
 
-        assertNull(result.mood)
+        assertTrue(result.isSuccess)
+        assertNull(result.getOrThrow().mood)
     }
 
     @Test
@@ -62,7 +64,8 @@ class DiaryEntryDtoToDomainMapperTest {
 
         val result = mapper.map(dto)
 
-        assertEquals(emptyList<String>(), result.tags)
+        assertTrue(result.isSuccess)
+        assertEquals(emptyList<String>(), result.getOrThrow().tags)
     }
 
     @Test
@@ -71,7 +74,8 @@ class DiaryEntryDtoToDomainMapperTest {
 
         val result = mapper.map(dto)
 
-        assertNull(result.aiSummary)
+        assertTrue(result.isSuccess)
+        assertNull(result.getOrThrow().aiSummary)
     }
 
     @Test
@@ -80,12 +84,14 @@ class DiaryEntryDtoToDomainMapperTest {
 
         val result = mapper.map(dto)
 
-        assertEquals("min", result.id)
-        assertEquals("hello", result.content)
-        assertEquals(0L, result.date)
-        assertNull(result.mood)
-        assertEquals(emptyList<String>(), result.tags)
-        assertNull(result.aiSummary)
+        assertTrue(result.isSuccess)
+        val entry = result.getOrThrow()
+        assertEquals("min", entry.id)
+        assertEquals("hello", entry.content)
+        assertEquals(0L, entry.date)
+        assertNull(entry.mood)
+        assertEquals(emptyList<String>(), entry.tags)
+        assertNull(entry.aiSummary)
     }
 
     @Test
@@ -95,26 +101,29 @@ class DiaryEntryDtoToDomainMapperTest {
 
             val result = mapper.map(dto)
 
-            assertEquals(mood, result.mood)
+            assertTrue(result.isSuccess)
+            assertEquals(mood, result.getOrThrow().mood)
         }
     }
 
     @Test
-    fun `map throws IllegalArgumentException for invalid mood string`() {
+    fun `map returns failure for invalid mood string`() {
         val dto = fullDto.copy(mood = "NOT_A_MOOD")
 
-        assertFailsWith<IllegalArgumentException> {
-            mapper.map(dto)
-        }
+        val result = mapper.map(dto)
+
+        assertTrue(result.isFailure)
+        assertTrue(result.exceptionOrNull() is IllegalArgumentException)
     }
 
     @Test
-    fun `map throws for empty mood string`() {
+    fun `map returns failure for empty mood string`() {
         val dto = fullDto.copy(mood = "")
 
-        assertFailsWith<IllegalArgumentException> {
-            mapper.map(dto)
-        }
+        val result = mapper.map(dto)
+
+        assertTrue(result.isFailure)
+        assertTrue(result.exceptionOrNull() is IllegalArgumentException)
     }
 
     // --- mapReverse (Domain → DTO) ---
@@ -169,7 +178,7 @@ class DiaryEntryDtoToDomainMapperTest {
     // --- Round-trip ---
     @Test
     fun `map then mapReverse round-trip preserves data`() {
-        val result = mapper.mapReverse(mapper.map(fullDto))
+        val result = mapper.mapReverse(mapper.map(fullDto).getOrThrow())
 
         assertEquals(fullDto, result)
     }
@@ -178,6 +187,7 @@ class DiaryEntryDtoToDomainMapperTest {
     fun `mapReverse then map round-trip preserves data`() {
         val result = mapper.map(mapper.mapReverse(fullEntry))
 
-        assertEquals(fullEntry, result)
+        assertTrue(result.isSuccess)
+        assertEquals(fullEntry, result.getOrThrow())
     }
 }
