@@ -1,0 +1,40 @@
+{
+  "model": "phi4:14b",
+  "total_examples": 45,
+  "timestamp": "2026-04-26T15:47:53.936Z",
+  "overall_metrics": {
+    "avg_precision": 0.8056,
+    "avg_recall": 0.7715,
+    "avg_f1": 0.7826,
+    "precision_by_category": {
+      "correct": 0.9223,
+      "boundary": 0.6667,
+      "hard": 0.8278
+    },
+    "recall_by_category": {
+      "correct": 0.9223,
+      "boundary": 0.6333,
+      "hard": 0.7589
+    }
+  },
+  "confidence_metrics": {
+    "avg_confidence": 0.9796,
+    "accepted": 37,
+    "review": 2,
+    "rejected": 6,
+    "accept_rate": 0.8222,
+    "reject_rate": 0.1333
+  },
+  "latency_metrics": {
+    "avg_self_check_ms": 26129,
+    "avg_total_ms": 26129,
+    "p50_ms": 25406,
+    "p95_ms": 40997,
+    "p99_ms": 47912
+  },
+  "constraint_metrics": {
+    "avg_errors": 0.0889,
+    "avg_warnings": 0.3556,
+    "perfect_constraint_rate": 0.6667
+  }
+}
