@@ -47,7 +47,7 @@ interface ModelRouterConfig {
   strongBaseUrl?: string;     // default: "https://api.z.ai/api/coding/paas/v4"
   strongApiKey?: string;      // default: process.env.GLM_API_KEY
   strongModel?: string;       // default: "glm-5-turbo"
-  strongTimeout?: number;     // default: 60000
+  strongTimeout?: number;     // default: 120000
 
   minResponseLength?: number; // default: 30
   minConfidence?: number;     // default: 5
@@ -77,6 +77,15 @@ function extractConfidence(text: string): number {
     if (m) return Math.min(10, Math.max(0, Math.abs(Number(m[1]))));
   }
   return 5; // default
+}
+
+function stripThinkingTokens(text: string): string {
+  let cleaned = text.replace(/<think\b[\s\S]*?<\/think\s*>?/gi, "").trim();
+  if (cleaned.startsWith("<think")) {
+    const idx = cleaned.indexOf("\n\n");
+    if (idx > 0) cleaned = cleaned.substring(idx + 2).trim();
+  }
+  return cleaned;
 }
 
 function stripConfidenceLine(text: string): string {
@@ -114,7 +123,6 @@ function detectUncertainty(text: string): boolean {
 
 class ModelRouter {
   private readonly cheapClient: OpenAI;
-  private readonly strongClient: OpenAI;
   private readonly config: Required<ModelRouterConfig>;
 
   constructor(config?: ModelRouterConfig) {
@@ -138,9 +146,9 @@ class ModelRouter {
         config?.strongBaseUrl ?? "https://api.z.ai/api/coding/paas/v4",
       strongApiKey: strongApiKey,
       strongModel: config?.strongModel ?? "glm-5-turbo",
-      strongTimeout: config?.strongTimeout ?? 60_000,
-      minResponseLength: config?.minResponseLength ?? 30,
-      minConfidence: config?.minConfidence ?? 5,
+      strongTimeout: config?.strongTimeout ?? 120_000,
+      minResponseLength: config?.minResponseLength ?? 15,
+      minConfidence: config?.minConfidence ?? 6,
       systemPrompt: config?.systemPrompt ?? DEFAULT_CHEAP_SYSTEM_PROMPT,
     };
 
@@ -148,12 +156,6 @@ class ModelRouter {
       baseURL: this.config.cheapBaseUrl,
       apiKey: this.config.cheapApiKey,
       timeout: this.config.cheapTimeout,
-    });
-
-    this.strongClient = new OpenAI({
-      baseURL: this.config.strongBaseUrl,
-      apiKey: this.config.strongApiKey,
-      timeout: this.config.strongTimeout,
     });
   }
 
@@ -177,15 +179,21 @@ class ModelRouter {
           { role: "user", content: prompt },
         ],
         temperature: 0.3,
-        max_tokens: 2048,
-      });
-      const content = completion.choices[0]?.message?.content ?? "";
+        max_tokens: 512,
+        // Disable thinking mode for Qwen3.6 via llama.cpp chat template
+        chat_template_kwargs: { enable_thinking: false },
+      } as any);
+      const raw = completion.choices[0]?.message as unknown as Record<string, unknown>;
+      const content = (raw?.content as string) ?? "";
+      const reasoning = (raw?.reasoning_content as string) ?? "";
+      // Fallback: use reasoning_content if content is empty (Qwen3 thinking model)
+      const effectiveContent = content.length > 0 ? content : reasoning;
       cheapResponse = {
-        content,
+        content: effectiveContent,
         model: completion.model,
         tier: "cheap",
         latencyMs: Date.now() - start,
-        confidenceScore: extractConfidence(content),
+        confidenceScore: extractConfidence(effectiveContent),
       };
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : String(err);
@@ -226,18 +234,51 @@ class ModelRouter {
 
   async queryStrong(prompt: string): Promise<ModelResponse> {
     const start = Date.now();
-    const completion = await this.strongClient.chat.completions.create({
+    const url = `${this.config.strongBaseUrl}/chat/completions`;
+    const body = JSON.stringify({
       model: this.config.strongModel,
       messages: [
         { role: "system", content: STRONG_SYSTEM_PROMPT },
         { role: "user", content: prompt },
       ],
       temperature: 0.3,
-      max_tokens: 4096,
+      max_tokens: 2048,
     });
+
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${this.config.strongApiKey}`,
+      },
+      body,
+      signal: AbortSignal.timeout(this.config.strongTimeout),
+    });
+
+    if (!res.ok) {
+      const text = await res.text().catch(() => "unknown");
+      throw new Error(`Strong API error ${res.status}: ${text}`);
+    }
+
+    const data = (await res.json()) as {
+      model: string;
+      choices: Array<{
+        message: {
+          content?: string;
+          reasoning_content?: string;
+        };
+      }>;
+    };
+
+    const message = data.choices[0]?.message;
+    const content = (message?.content ?? "").trim();
+    const reasoning = (message?.reasoning_content ?? "").trim();
+    // glm-5-turbo is a thinking model: fallback to reasoning_content if content empty
+    const effectiveContent = content.length > 0 ? content : reasoning;
+
     return {
-      content: completion.choices[0]?.message?.content ?? "",
-      model: completion.model,
+      content: effectiveContent,
+      model: data.model,
       tier: "strong",
       latencyMs: Date.now() - start,
       confidenceScore: 10, // remote model — assumed confident
@@ -247,8 +288,9 @@ class ModelRouter {
   // ── Evaluate heuristics on a response ──────────────────────────────────
 
   evaluateHeuristics(response: string): RoutingDecision {
-    const confidence = extractConfidence(response);
-    const cleanResponse = stripConfidenceLine(response);
+    const cleaned = stripThinkingTokens(response);
+    const confidence = extractConfidence(cleaned);
+    const cleanResponse = stripConfidenceLine(cleaned);
     const shortResponse = cleanResponse.length < this.config.minResponseLength;
     const uncertainty = detectUncertainty(cleanResponse);
     const lowConfidence = confidence < this.config.minConfidence;
@@ -297,12 +339,21 @@ class ModelRouter {
     }
 
     try {
-      await this.strongClient.chat.completions.create({
-        model: this.config.strongModel,
-        messages: [{ role: "user", content: "ping" }],
-        max_tokens: 1,
+      const url = `${this.config.strongBaseUrl}/chat/completions`;
+      const res = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${this.config.strongApiKey}`,
+        },
+        body: JSON.stringify({
+          model: this.config.strongModel,
+          messages: [{ role: "user", content: "ping" }],
+          max_tokens: 1,
+        }),
+        signal: AbortSignal.timeout(30000),
       });
-      strong = true;
+      strong = res.ok;
     } catch {
       strong = false;
     }
