@@ -57,6 +57,7 @@ interface ModelRouterConfig {
 // ─── Constants ──────────────────────────────────────────────────────────────
 
 const DEFAULT_CHEAP_SYSTEM_PROMPT =
+  "/no_think\n" +
   "Ты полезный AI-ассистент. Отвечай на вопросы по-русски чётко и по существу.\n" +
   "После ответа, на отдельной строке, напиши: CONFIDENCE: <число от 1 до 10>\n" +
   "Где 1 — ты совершенно не уверен, 10 — абсолютно уверен.";
@@ -77,6 +78,15 @@ function extractConfidence(text: string): number {
     if (m) return Math.min(10, Math.max(0, Math.abs(Number(m[1]))));
   }
   return 5; // default
+}
+
+function stripThinkingTokens(text: string): string {
+  let cleaned = text.replace(/<think\b[\s\S]*?<\/think\s*>?/gi, "").trim();
+  if (cleaned.startsWith("<think")) {
+    const idx = cleaned.indexOf("\n\n");
+    if (idx > 0) cleaned = cleaned.substring(idx + 2).trim();
+  }
+  return cleaned;
 }
 
 function stripConfidenceLine(text: string): string {
@@ -247,8 +257,9 @@ class ModelRouter {
   // ── Evaluate heuristics on a response ──────────────────────────────────
 
   evaluateHeuristics(response: string): RoutingDecision {
-    const confidence = extractConfidence(response);
-    const cleanResponse = stripConfidenceLine(response);
+    const cleaned = stripThinkingTokens(response);
+    const confidence = extractConfidence(cleaned);
+    const cleanResponse = stripConfidenceLine(cleaned);
     const shortResponse = cleanResponse.length < this.config.minResponseLength;
     const uncertainty = detectUncertainty(cleanResponse);
     const lowConfidence = confidence < this.config.minConfidence;
