@@ -47,7 +47,7 @@ interface ModelRouterConfig {
   strongBaseUrl?: string;     // default: "https://api.z.ai/api/coding/paas/v4"
   strongApiKey?: string;      // default: process.env.GLM_API_KEY
   strongModel?: string;       // default: "glm-5-turbo"
-  strongTimeout?: number;     // default: 60000
+  strongTimeout?: number;     // default: 120000
 
   minResponseLength?: number; // default: 30
   minConfidence?: number;     // default: 5
@@ -146,7 +146,7 @@ class ModelRouter {
         config?.strongBaseUrl ?? "https://api.z.ai/api/coding/paas/v4",
       strongApiKey: strongApiKey,
       strongModel: config?.strongModel ?? "glm-5-turbo",
-      strongTimeout: config?.strongTimeout ?? 60_000,
+      strongTimeout: config?.strongTimeout ?? 120_000,
       minResponseLength: config?.minResponseLength ?? 15,
       minConfidence: config?.minConfidence ?? 6,
       systemPrompt: config?.systemPrompt ?? DEFAULT_CHEAP_SYSTEM_PROMPT,
@@ -242,7 +242,7 @@ class ModelRouter {
         { role: "user", content: prompt },
       ],
       temperature: 0.3,
-      max_tokens: 4096,
+      max_tokens: 2048,
     });
 
     const res = await fetch(url, {
@@ -262,11 +262,22 @@ class ModelRouter {
 
     const data = (await res.json()) as {
       model: string;
-      choices: Array<{ message: { content?: string } }>;
+      choices: Array<{
+        message: {
+          content?: string;
+          reasoning_content?: string;
+        };
+      }>;
     };
 
+    const message = data.choices[0]?.message;
+    const content = (message?.content ?? "").trim();
+    const reasoning = (message?.reasoning_content ?? "").trim();
+    // glm-5-turbo is a thinking model: fallback to reasoning_content if content empty
+    const effectiveContent = content.length > 0 ? content : reasoning;
+
     return {
-      content: data.choices[0]?.message?.content ?? "",
+      content: effectiveContent,
       model: data.model,
       tier: "strong",
       latencyMs: Date.now() - start,

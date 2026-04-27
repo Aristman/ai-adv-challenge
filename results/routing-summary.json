@@ -1,45 +1,45 @@
 {
-  "timestamp": "2026-04-27T08:51:56.103Z",
+  "timestamp": "2026-04-27T10:20:30.078Z",
   "total_queries": 30,
   "model_config": {
     "cheap": "Qwen3.6-35B-A3B (llama.cpp :8080)",
     "strong": "glm-5-turbo (ZAI API)"
   },
   "routing_metrics": {
-    "cheap_count": 30,
-    "escalated_count": 0,
-    "escalation_rate": 0,
-    "correct_routing": 10,
-    "routing_accuracy": 0.3333333333333333,
+    "cheap_count": 11,
+    "escalated_count": 19,
+    "escalation_rate": 0.6333333333333333,
+    "correct_routing": 25,
+    "routing_accuracy": 0.8333333333333334,
     "accuracy_by_category": {
-      "easy": 1,
-      "medium": 0,
-      "hard": 0
+      "easy": 0.8,
+      "medium": 0.9,
+      "hard": 0.8
     }
   },
   "quality_metrics": {
-    "keyword_match_rate": 0.8666666666666667,
+    "keyword_match_rate": 0.9333333333333333,
     "keyword_match_by_category": {
       "easy": 1,
       "medium": 1,
-      "hard": 0.6
+      "hard": 0.8
     },
-    "avg_confidence_cheap": 6.3,
-    "avg_confidence_strong": 0
+    "avg_confidence_cheap": 9.090909090909092,
+    "avg_confidence_strong": 10
   },
   "latency_metrics": {
-    "avg_cheap_ms": 20582,
-    "avg_escalated_ms": 0,
-    "avg_total_ms": 20582,
-    "p50_ms": 23626,
-    "p95_ms": 37115,
-    "p99_ms": 37644
+    "avg_cheap_ms": 9617,
+    "avg_escalated_ms": 79196,
+    "avg_total_ms": 53684,
+    "p50_ms": 69083,
+    "p95_ms": 113484,
+    "p99_ms": 123155
   },
   "heuristics_breakdown": {
     "escalation_reasons": {
-      "short_response": 0,
-      "uncertainty_detected": 0,
-      "low_confidence": 0,
+      "short_response": 2,
+      "uncertainty_detected": 4,
+      "low_confidence": 16,
       "error_occurred": 0
     }
   }
