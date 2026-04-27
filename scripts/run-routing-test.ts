@@ -107,7 +107,7 @@ interface RoutingSummary {
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
-const REQUEST_DELAY_MS = 1_000;
+const REQUEST_DELAY_MS = 0;
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
