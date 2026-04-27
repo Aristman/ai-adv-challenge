@@ -1,6 +1,6 @@
 # Documentation Manifest
 
-> Last updated: 2026-04-27
+> Last updated: 2026-04-27 (post AIACH-009 report)
 > Maintainer: docs-impl agent
 
 ## User-Facing Documentation
@@ -25,6 +25,7 @@
 | docs/reports/step1-setup.md | ✅ | Intermediate: NER pipeline setup |
 | docs/reports/report_confidence-assessment_2026-04-26.md | ✅ | Final report: NER confidence assessment |
 | docs/reports/report_model-routing_2026-04-26.md | ✅ | Final report: model routing with fallback logic (83.3% accuracy, fix history) |
+| docs/reports/report_two-level-inference_2026-04-27.md | ✅ | Final report: two-level NER inference (micro-model + LLM fallback, 37.8% LLM calls saved) |
 | docs/tests/scenarios.md | ✅ | Test scenarios |
 | docs/smoke-reports/ | ✅ | Smoke test reports |
 | docs/decisions/ | ❌ | Architecture Decision Records |
