@@ -1,6 +1,6 @@
 # Documentation Manifest
 
-> Last updated: 2026-04-26
+> Last updated: 2026-04-27
 > Maintainer: docs-impl agent
 
 ## User-Facing Documentation
@@ -24,6 +24,7 @@
 | docs/specs/report_fine-tuning-kotlin-code_2026-04-26.md | ✅ | Report: fine-tuning Kotlin code generation |
 | docs/reports/step1-setup.md | ✅ | Intermediate: NER pipeline setup |
 | docs/reports/report_confidence-assessment_2026-04-26.md | ✅ | Final report: NER confidence assessment |
+| docs/reports/report_model-routing_2026-04-26.md | ✅ | Final report: model routing with fallback logic |
 | docs/tests/scenarios.md | ✅ | Test scenarios |
 | docs/smoke-reports/ | ✅ | Smoke test reports |
 | docs/decisions/ | ❌ | Architecture Decision Records |

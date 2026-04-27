@@ -102,6 +102,8 @@ class LlamaServerManager {
       "-m", this.modelPath,
       "-c", String(this.ctxSize),
       "-ngl", String(this.ngl),
+      "-np", "1",
+      "--cache-ram", "0",
       "--port", String(this.port),
       "--host", this.host,
       "--threads", String(THREADS),
