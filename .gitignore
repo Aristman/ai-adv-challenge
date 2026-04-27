@@ -45,4 +45,5 @@ docs/smoke-reports/*.png
 # Node.js (fine-tuning)
 node_modules/
 dist/
+.env
 
