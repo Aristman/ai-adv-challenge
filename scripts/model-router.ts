@@ -147,8 +147,8 @@ class ModelRouter {
       strongApiKey: strongApiKey,
       strongModel: config?.strongModel ?? "glm-5-turbo",
       strongTimeout: config?.strongTimeout ?? 60_000,
-      minResponseLength: config?.minResponseLength ?? 1,
-      minConfidence: config?.minConfidence ?? 5,
+      minResponseLength: config?.minResponseLength ?? 15,
+      minConfidence: config?.minConfidence ?? 6,
       systemPrompt: config?.systemPrompt ?? DEFAULT_CHEAP_SYSTEM_PROMPT,
     };
 
